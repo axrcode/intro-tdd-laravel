@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -32,5 +33,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/prueba', function () {
     return $user = JWTAuth::parseToken()->authenticate();
 });
+
+Route::resource('tasks', TaskController::class);
 
 require __DIR__.'/auth.php';
