@@ -30,4 +30,24 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+
+    public function login(Request $request) {
+
+        $credentials = $request->validate([
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $token = JWTAuth::attempt($credentials);
+
+        if ( !$token ) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        return response()->json([
+            'token' => $token,
+        ]);
+    }
 }

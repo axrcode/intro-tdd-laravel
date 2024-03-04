@@ -52,4 +52,36 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertRedirect('/');
     }
+
+    public function test_users_can_authenticate_using_the_login_screen_by_api(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertStatus(200);
+
+        $response->assertJsonStructure([
+            'token'
+        ]);
+    }
+
+    public function test_users_can_not_authenticate_with_invalid_password_by_api(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertStatus(401);
+
+        $response->assertJson([
+            'message' => 'Unauthorized'
+        ]);
+    }
 }
