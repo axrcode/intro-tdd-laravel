@@ -27,7 +27,7 @@ class TaskTest extends TestCase
 
         $image = UploadedFile::fake()->image('avatar.jpg');
 
-        $response = $this->postJson(route('tasks.store'), [
+        $response = $this->postJson(route('api.tasks.store'), [
             'title' => 'Test Task',
             'description' => 'Test Task Description',
             'status' => 'pending',
@@ -65,7 +65,7 @@ class TaskTest extends TestCase
 
         $token = JWTAuth::fromUser($user);
 
-        $response = $this->post(route('tasks.store'), [
+        $response = $this->post(route('api.tasks.store'), [
             'title' => '',
             'description' => '',
             'status' => '',
@@ -85,7 +85,7 @@ class TaskTest extends TestCase
 
         $image = UploadedFile::fake()->image('avatar.jpg');
 
-        $response = $this->postJson(route('tasks.store'), [
+        $response = $this->postJson(route('api.tasks.store'), [
             'title' => 'Test Task',
             'description' => 'Test Task Description',
             'status' => 'pending',
