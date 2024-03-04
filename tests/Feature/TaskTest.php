@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskTest extends TestCase
 {
@@ -19,13 +21,19 @@ class TaskTest extends TestCase
     {
         Storage::fake();
 
+        $user = User::factory()->create();
+
+        $token = JWTAuth::fromUser($user);
+
         $image = UploadedFile::fake()->image('avatar.jpg');
 
-        $response = $this->post(route('tasks.store'), [
+        $response = $this->postJson(route('tasks.store'), [
             'title' => 'Test Task',
             'description' => 'Test Task Description',
             'status' => 'pending',
             'image' => $image,
+        ], [
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(200);
@@ -39,6 +47,7 @@ class TaskTest extends TestCase
                 'description' => 'Test Task Description',
                 'status' => 'pending',
                 'image' => 'tasks/' . $image->hashName(),
+                'user_id' => $user->id,
             ]
         ]);
 
@@ -52,16 +61,41 @@ class TaskTest extends TestCase
 
     public function test_no_validation_passed()
     {
+        $user = User::factory()->create();
+
+        $token = JWTAuth::fromUser($user);
+
         $response = $this->post(route('tasks.store'), [
             'title' => '',
             'description' => '',
             'status' => '',
         ], [
             'Accept' => 'application/json',
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(422);
 
         $response->assertJsonStructure([ 'status', 'data', 'errors' ]);
+    }
+
+    public function test_task_not_created_not_auth()
+    {
+        Storage::fake();
+
+        $image = UploadedFile::fake()->image('avatar.jpg');
+
+        $response = $this->postJson(route('tasks.store'), [
+            'title' => 'Test Task',
+            'description' => 'Test Task Description',
+            'status' => 'pending',
+            'image' => $image,
+        ]);
+
+        $response->assertStatus(401);
+
+        $response->assertJson([
+            'message' => 'Unauthenticated.'
+        ]);
     }
 }

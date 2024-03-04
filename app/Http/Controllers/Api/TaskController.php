@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TaskController extends Controller
 {
@@ -26,6 +27,8 @@ class TaskController extends Controller
     {
         try {
 
+            $user = JWTAuth::parseToken()->authenticate();
+
             $data = $request->validate([
                 'title' => 'required',
                 'description' => 'required',
@@ -40,6 +43,7 @@ class TaskController extends Controller
             $task->description = $data['description'];
             $task->status = $data['status'];
             $task->image = $data['image'];
+            $task->user_id = $user->id;
             $task->save();
 
             $codeStatus = 200;
